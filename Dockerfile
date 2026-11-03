@@ -1,14 +1,10 @@
-# syntax=docker/dockerfile:1
-
-# ---------- Stage 1: dependency PHP (composer) ----------
 FROM composer:2 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock ./
-# ekstensi PHP dipasang di stage final, jadi cek platform dilewati di sini
+
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist \
     --no-interaction --ignore-platform-reqs
 
-# ---------- Stage 2: build aset frontend (Vite + Tailwind) ----------
 FROM node:22-bookworm-slim AS assets
 WORKDIR /app
 COPY package.json package-lock.json* .npmrc ./
@@ -18,7 +14,7 @@ COPY resources ./resources
 COPY public ./public
 RUN npm run build
 
-# ---------- Stage 3: image final (Apache + PHP 8.4) ----------
+
 FROM php:8.4-apache AS final
 
 RUN apt-get update \
